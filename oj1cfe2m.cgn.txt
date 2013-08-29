@@ -1,0 +1,507 @@
+﻿A
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+#
+# Initial commit
+#
+# Changes to be committed:
+#   (use "git rm --cached <file>..." to unstage)
+#
+#	new file:   01_dictionary/dictionary.rb
+#	new file:   01_dictionary/dictionary_spec.rb
+#	new file:   02_cosm/cosm_parser.rb
+#	new file:   02_cosm/cosm_parser_spec.rb
+#	new file:   02_cosm/cosm_stream.rb
+#	new file:   02_cosm/example_cosm_access_by_http.rb
+#	new file:   02_cosm/feed.rb
+#	new file:   02_cosm/feed_spec.rb
+#	new file:   02_cosm/spec/fixtures/49679.json
+#	new file:   02_cosm/spec/fixtures/49679_rental_low_value.json
+#	new file:   02_cosm/spec/fixtures/49679_rental_peak_value.json
+#	new file:   02_cosm/spec/fixtures/49679_rental_plateau_value.json
+#	new file:   02_cosm/spec/fixtures/cosm_screen_49679.png
+#	new file:   Gemfile
+#	new file:   Gemfile.lock
+#	new file:   README.md
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#	.gitignore
+#	.rvmrc
+#	5vzayqvw.1qc.txt
+#	czd5bta0.5o3.txt
+#	e3kptend.w1t.txt
+#	fyysqiwx.vv5.txt
+#	jesvau0t.qjb.txt
+#	rgpuwnig.tyh.txt
+diff --git a/01_dictionary/dictionary.rb b/01_dictionary/dictionary.rb
+new file mode 100644
+index 0000000..b3b1c83
+--- /dev/null
++++ b/01_dictionary/dictionary.rb
+@@ -0,0 +1,37 @@
++# class Dictionary
++# Andrew Id: luningp
++
++class Dictionary
++  def initialize
++    @hash = {}
++  end
++
++  def add(key_value)
++    key_value.each do |key, value|
++      @hash[key] = value
++    end
++  end
++
++  def entries
++     @hash
++  end
++  #sort hash keys alphabetically
++  def keywords
++     @hash.keys.sort
++  end
++  
++  def include?(key_value)
++     @hash.include? key_value
++  end
++  #find matches from a prefix
++  def find(str)
++    matched = {}
++	@hash.keys.each do |key|
++		if key.index(str)
++			matched[key] = @hash[key]
++		end
++	end	
++	return matched
++  end
++  
++end
+\ No newline at end of file
+diff --git a/01_dictionary/dictionary_spec.rb b/01_dictionary/dictionary_spec.rb
+new file mode 100644
+index 0000000..327e324
+--- /dev/null
++++ b/01_dictionary/dictionary_spec.rb
+@@ -0,0 +1,79 @@
++# Creative Commons source: test-first teaching (http://testfirst.org/)
++
++# # Topics
++#
++# * Hash
++# * Array
++# * instance variables
++# * regular expressions
++#
++
++require './dictionary.rb'
++
++describe Dictionary do
++  before do
++    @d = Dictionary.new
++  end
++
++  it 'is empty when created' do
++    @d.entries.should == {}
++  end
++
++  it 'can add whole entries with keyword and definition' do
++    @d.add('fish' => 'aquatic animal')
++    @d.entries.should == {'fish' => 'aquatic animal'}
++    @d.keywords.should == ['fish']
++  end
++
++  it 'add keywords (without definition)' do
++    @d.add('fish')
++    @d.entries.should == {'fish' => nil}
++    @d.keywords.should == ['fish']
++  end
++
++  it 'can check whether a given keyword exists' do
++    @d.include?('fish').should be_false
++  end
++
++  it "doesn't cheat when checking whether a given keyword exists" do
++    @d.include?('fish').should be_false # if the method is empty, this test passes with nil returned
++    @d.add('fish')
++    @d.include?('fish').should be_true # confirms that it actually checks
++    @d.include?('bird').should be_false # confirms not always returning true after add
++  end
++
++  it "doesn't include a prefix that wasn't added as a word in and of itself" do
++    @d.add('fish')
++    @d.include?('fi').should be_false
++  end
++
++  it "doesn't find a word in empty dictionary" do
++    @d.find('fi').should be_empty # {}
++  end
++
++  it 'finds nothing if the prefix matches nothing' do
++    @d.add('fiend')
++    @d.add('great')
++    @d.find('nothing').should be_empty
++  end
++
++  it "finds an entry" do
++    @d.add('fish' => 'aquatic animal')
++    @d.find('fish').should == {'fish' => 'aquatic animal'}
++  end
++
++  it 'finds multiple matches from a prefix and returns the entire entry (keyword + definition)' do
++    @d.add('fish' => 'aquatic animal')
++    @d.add('fiend' => 'wicked person')
++    @d.add('great' => 'remarkable')
++    @d.find('fi').should == {'fish' => 'aquatic animal', 'fiend' => 'wicked person'}
++  end
++
++  it 'lists keywords alphabetically' do
++    @d.add('zebra' => 'African land animal with stripes')
++    @d.add('fish' => 'aquatic animal')
++    @d.add('apple' => 'fruit')
++    @d.keywords.should == %w(apple fish zebra)
++  end
++
++end
+diff --git a/02_cosm/cosm_parser.rb b/02_cosm/cosm_parser.rb
+new file mode 100644
+index 0000000..ea3e6bb
+--- /dev/null
++++ b/02_cosm/cosm_parser.rb
+@@ -0,0 +1,9 @@
++require "net/http"
++require "uri"
++require 'json'
++
++class CosmParser
++
++
++end
++
+diff --git a/02_cosm/cosm_parser_spec.rb b/02_cosm/cosm_parser_spec.rb
+new file mode 100644
+index 0000000..a9746bd
+--- /dev/null
++++ b/02_cosm/cosm_parser_spec.rb
+@@ -0,0 +1,36 @@
++require "./cosm_parser.rb"
++require "rspec"
++require "fake_web"
++
++describe CosmParser do
++
++  before :all do
++    FakeWeb.allow_net_connect = false
++    @json_string = File.open(File.join('spec','fixtures','49679.json')).read
++  end
++
++  it "connects to COSM to retrieve a datapoint as a json string" do
++    @url = "http://api.cosm.com/v2/feeds/49679"
++    json_string = File.open(File.join('spec','fixtures','49679.json')).read
++    FakeWeb.register_uri(:get, @url, :body => json_string ,  :content_type => "application/json")
++    FakeWeb.register_uri(:get, @url + ".json", :body => json_string ,  :content_type => "application/json")
++    response = CosmParser.get_feed("49679")
++    response.should == json_string
++  end
++
++  # convert_json_to_object
++  # Input:
++  #   {"title":"House","status":"live","creator":"https://cosm.com/users/kaneohe1450","datastreams":[{"at":"2012-06-21T22:23:27.725649Z","tags":["Mains"],"unit":{"type":"derivedSI","label":"W"},"max_value":"16958.0","current_value":"820","id":"0","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Rental"],"unit":{"type":"derivedSI","label":"W"},"max_value":"12428.0","current_value":"123","id":"1","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Office"],"unit":{"type":"derivedSI","label":"W"},"max_value":"638.0","current_value":"315","id":"2","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Refrig"],"unit":{"type":"derivedSI","label":"W"},"max_value":"838.0","current_value":"74","id":"3","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Freezer"],"unit":{"type":"derivedSI","label":"W"},"max_value":"2530.0","current_value":"140","id":"4","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["M Bedroom"],"unit":{"type":"derivedSI","label":"W"},"max_value":"1444.0","current_value":"40","id":"5","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Water Heater"],"unit":{"type":"derivedSI","label":"W"},"max_value":"5189.0","current_value":"0","id":"6","min_value":"0.0"}],"location":{"domain":"physical","lat":20.632784250388,"lon":-158.203125},"created":"2012-02-25T03:26:13.453958Z","feed":"https://api.cosm.com/v2/feeds/49679.json","private":"false","id":49679,"version":"1.0.0","updated":"2012-06-21T22:23:27.754273Z"}
++  # Output:
++  #  {"title"=>"House", "status"=>"live", "creator"=>"https://cosm.com/users/kaneohe1450", "datastreams"=>[{"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["Mains"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"16958.0", "current_value"=>"820", "id"=>"0", "min_value"=>"0.0"}, {"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["Rental"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"12428.0", "current_value"=>"123", "id"=>"1", "min_value"=>"0.0"}, {"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["Office"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"638.0", "current_value"=>"315", "id"=>"2", "min_value"=>"0.0"}, {"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["Refrig"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"838.0", "current_value"=>"74", "id"=>"3", "min_value"=>"0.0"}, {"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["Freezer"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"2530.0", "current_value"=>"140", "id"=>"4", "min_value"=>"0.0"}, {"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["M Bedroom"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"1444.0", "current_value"=>"40", "id"=>"5", "min_value"=>"0.0"}, {"at"=>"2012-06-21T22:23:27.725649Z", "tags"=>["Water Heater"], "unit"=>{"type"=>"derivedSI", "label"=>"W"}, "max_value"=>"5189.0", "current_value"=>"0", "id"=>"6", "min_value"=>"0.0"}], "location"=>{"domain"=>"physical", "lat"=>20.632784250388, "lon"=>-158.203125}, "created"=>"2012-02-25T03:26:13.453958Z", "feed"=>"https://api.cosm.com/v2/feeds/49679.json", "private"=>"false", "id"=>49679, "version"=>"1.0.0", "updated"=>"2012-06-21T22:23:27.754273Z"}
++  context "converts a json string into a ruby object" do
++    before do
++      @json_object = CosmParser.convert_json_to_ruby_object(@json_string)
++    end
++
++    it { @json_object.should be_a_kind_of(Hash) }
++    it { @json_object["datastreams"].should be_a_kind_of(Array) }
++    it { @json_object["datastreams"][0]["tags"].should be_a_kind_of(Array) }
++  end
++end
++
+diff --git a/02_cosm/cosm_stream.rb b/02_cosm/cosm_stream.rb
+new file mode 100644
+index 0000000..bdcb385
+--- /dev/null
++++ b/02_cosm/cosm_stream.rb
+@@ -0,0 +1,40 @@
++$: << 'lib' << '../lib'
++require 'rubygems'
++require 'eventmachine'
++require 'pachube-stream'
++
++require './feed.rb'
++
++#Code from https://github.com/carboncalculated/pachube-stream/blob/master/examples/subscribe.rb
++
++EM.run do                
++  connection = PachubeStream::Connection.connect(:api_key => ENV["PACHUBE_API_KEY"])
++
++  connection.on_reconnect do |timeout, reconnect_retries|
++    puts timeout
++    puts reconnect_retries
++  end
++  
++  connection.on_max_reconnects do |timeout, reconnect_retries|
++    puts timeout
++    puts reconnect_retries
++  end
++  
++  feed = connection.subscribe("/feeds/6643") # random Feed  
++  
++  feed.on_datastream do |response|
++    puts "on_datastream"
++    puts response
++    current_value = Feed.new(response["body"]).current_value_for_datastream(1)
++    puts "current value: " + current_value
++  end
++  
++  feed.on_complete do |response|
++    puts "on complete"
++    puts response
++  end
++  
++  feed.on_error do |response|
++    puts response
++  end
++end
+\ No newline at end of file
+diff --git a/02_cosm/example_cosm_access_by_http.rb b/02_cosm/example_cosm_access_by_http.rb
+new file mode 100644
+index 0000000..92ca22d
+--- /dev/null
++++ b/02_cosm/example_cosm_access_by_http.rb
+@@ -0,0 +1,19 @@
++require "net/http"
++require "uri"
++
++uri = URI.parse("http://api.cosm.com/v2/feeds/YOUR_FEED_ID")
++uri = URI.parse("http://api.cosm.com/v2/feeds/6643")
++http = Net::HTTP.new(uri.host, uri.port)
++
++request = Net::HTTP::Get.new(uri.request_uri)
++request["X-ApiKey"] = "YOUR_API_KEY_HERE"
++request["X-ApiKey"] = "7fOn_xBHvPhrs0ZBkdau6GV2L_KSAKxzYlQyZHBPRUFtMD0g"
++
++response = http.request(request)
++
++puts response.code
++puts response.body
++
++
++
++#For additional exmamples on how to use Net:HTTP, see https://github.com/augustl/net-http-cheat-sheet/
+\ No newline at end of file
+diff --git a/02_cosm/feed.rb b/02_cosm/feed.rb
+new file mode 100644
+index 0000000..0db95cf
+--- /dev/null
++++ b/02_cosm/feed.rb
+@@ -0,0 +1,13 @@
++require "./cosm_parser.rb"
++
++class Feed
++
++  def initialize(input)
++    case input
++      when String
++      when Hash
++    end
++  end
++
++
++end
+\ No newline at end of file
+diff --git a/02_cosm/feed_spec.rb b/02_cosm/feed_spec.rb
+new file mode 100644
+index 0000000..48e3b6b
+--- /dev/null
++++ b/02_cosm/feed_spec.rb
+@@ -0,0 +1,51 @@
++require "./feed.rb"
++require "rspec"
++
++
++describe Feed do
++
++  before :all do
++    @json_string = File.open(File.join('spec', 'fixtures', '49679.json')).read
++    @current_feed = Feed.new(@json_string)
++  end
++
++  context "can parse any particular datastream from a feed" do
++
++    it "and provide the tag array" do
++      @current_feed.tags_array_for_datastream(1).should == ["Rental"]
++    end
++
++    it "and provide the current value" do
++      @current_feed.current_value_for_datastream(1).should == "123"
++    end
++
++    it "and provide the unit label" do
++      @current_feed.unit_label_for_datastream(1).should == "W"
++    end
++  end
++
++  context "can take an array of feeds and create a timeseries from a datastream" do
++    before do
++      @low_value_json_string = File.open(File.join('spec', 'fixtures', '49679_rental_low_value.json')).read
++      @peak_value_json_string = File.open(File.join('spec', 'fixtures', '49679_rental_peak_value.json')).read
++      @plateau_value_json_string = File.open(File.join('spec', 'fixtures', '49679_rental_plateau_value.json')).read
++      @feeds = [Feed.new(@low_value_json_string),
++                Feed.new(@low_value_json_string),
++                Feed.new(@low_value_json_string),
++                Feed.new(@peak_value_json_string),
++                Feed.new(@plateau_value_json_string),
++                Feed.new(@low_value_json_string)]
++    end
++    it "specified by number" do
++      datastream = 1
++      Feed.time_series(@feeds, datastream).should == ["12", "12", "12", "137", "122", "12"]
++    end
++
++    it "specified by a string" do
++      Feed.time_series(@feeds, "Rental").should == ["12", "12", "12", "137", "122", "12"]
++    end
++
++  end
++
++
++end
+diff --git a/02_cosm/spec/fixtures/49679.json b/02_cosm/spec/fixtures/49679.json
+new file mode 100644
+index 0000000..b950b7b
+--- /dev/null
++++ b/02_cosm/spec/fixtures/49679.json
+@@ -0,0 +1 @@
++{"title":"House","status":"live","creator":"https://cosm.com/users/kaneohe1450","datastreams":[{"at":"2012-06-21T22:23:27.725649Z","tags":["Mains"],"unit":{"type":"derivedSI","label":"W"},"max_value":"16958.0","current_value":"820","id":"0","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Rental"],"unit":{"type":"derivedSI","label":"W"},"max_value":"12428.0","current_value":"123","id":"1","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Office"],"unit":{"type":"derivedSI","label":"W"},"max_value":"638.0","current_value":"315","id":"2","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Refrig"],"unit":{"type":"derivedSI","label":"W"},"max_value":"838.0","current_value":"74","id":"3","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Freezer"],"unit":{"type":"derivedSI","label":"W"},"max_value":"2530.0","current_value":"140","id":"4","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["M Bedroom"],"unit":{"type":"derivedSI","label":"W"},"max_value":"1444.0","current_value":"40","id":"5","min_value":"0.0"},{"at":"2012-06-21T22:23:27.725649Z","tags":["Water Heater"],"unit":{"type":"derivedSI","label":"W"},"max_value":"5189.0","current_value":"0","id":"6","min_value":"0.0"}],"location":{"domain":"physical","lat":20.632784250388,"lon":-158.203125},"created":"2012-02-25T03:26:13.453958Z","feed":"https://api.cosm.com/v2/feeds/49679.json","private":"false","id":49679,"version":"1.0.0","updated":"2012-06-21T22:23:27.754273Z"}
+\ No newline at end of file
+diff --git a/02_cosm/spec/fixtures/49679_rental_low_value.json b/02_cosm/spec/fixtures/49679_rental_low_value.json
+new file mode 100644
+index 0000000..e5ff86a
+--- /dev/null
++++ b/02_cosm/spec/fixtures/49679_rental_low_value.json
+@@ -0,0 +1 @@
++{"title":"House","status":"live","creator":"https://cosm.com/users/kaneohe1450","datastreams":[{"at":"2012-06-22T17:55:58.622605Z","tags":["Mains"],"unit":{"type":"derivedSI","label":"W"},"max_value":"16958.0","current_value":"335","id":"0","min_value":"0.0"},{"at":"2012-06-22T17:55:58.622605Z","tags":["Rental"],"unit":{"type":"derivedSI","label":"W"},"max_value":"12428.0","current_value":"12","id":"1","min_value":"0.0"},{"at":"2012-06-22T17:55:58.622605Z","tags":["Office"],"unit":{"type":"derivedSI","label":"W"},"max_value":"638.0","current_value":"93","id":"2","min_value":"0.0"},{"at":"2012-06-22T17:55:58.622605Z","tags":["Refrig"],"unit":{"type":"derivedSI","label":"W"},"max_value":"838.0","current_value":"6","id":"3","min_value":"0.0"},{"at":"2012-06-22T17:55:58.622605Z","tags":["Freezer"],"unit":{"type":"derivedSI","label":"W"},"max_value":"2530.0","current_value":"0","id":"4","min_value":"0.0"},{"at":"2012-06-22T17:55:58.622605Z","tags":["M Bedroom"],"unit":{"type":"derivedSI","label":"W"},"max_value":"1444.0","current_value":"48","id":"5","min_value":"0.0"},{"at":"2012-06-22T17:55:58.622605Z","tags":["Water Heater"],"unit":{"type":"derivedSI","label":"W"},"max_value":"5189.0","current_value":"0","id":"6","min_value":"0.0"}],"location":{"domain":"physical","lat":20.632784250388,"lon":-158.203125},"created":"2012-02-25T03:26:13.453958Z","feed":"https://api.cosm.com/v2/feeds/49679.json","private":"false","id":49679,"version":"1.0.0","updated":"2012-06-22T17:55:58.667516Z"}
+\ No newline at end of file
+diff --git a/02_cosm/spec/fixtures/49679_rental_peak_value.json b/02_cosm/spec/fixtures/49679_rental_peak_value.json
+new file mode 100644
+index 0000000..8a896a4
+--- /dev/null
++++ b/02_cosm/spec/fixtures/49679_rental_peak_value.json
+@@ -0,0 +1 @@
++{"title":"House","status":"live","creator":"https://cosm.com/users/kaneohe1450","datastreams":[{"at":"2012-06-22T17:44:43.297184Z","tags":["Mains"],"unit":{"type":"derivedSI","label":"W"},"max_value":"16958.0","current_value":"496","id":"0","min_value":"0.0"},{"at":"2012-06-22T17:44:43.297184Z","tags":["Rental"],"unit":{"type":"derivedSI","label":"W"},"max_value":"12428.0","current_value":"137","id":"1","min_value":"0.0"},{"at":"2012-06-22T17:44:43.297184Z","tags":["Office"],"unit":{"type":"derivedSI","label":"W"},"max_value":"638.0","current_value":"89","id":"2","min_value":"0.0"},{"at":"2012-06-22T17:44:43.297184Z","tags":["Refrig"],"unit":{"type":"derivedSI","label":"W"},"max_value":"838.0","current_value":"6","id":"3","min_value":"0.0"},{"at":"2012-06-22T17:44:43.297184Z","tags":["Freezer"],"unit":{"type":"derivedSI","label":"W"},"max_value":"2530.0","current_value":"0","id":"4","min_value":"0.0"},{"at":"2012-06-22T17:44:43.297184Z","tags":["M Bedroom"],"unit":{"type":"derivedSI","label":"W"},"max_value":"1444.0","current_value":"47","id":"5","min_value":"0.0"},{"at":"2012-06-22T17:44:43.297184Z","tags":["Water Heater"],"unit":{"type":"derivedSI","label":"W"},"max_value":"5189.0","current_value":"0","id":"6","min_value":"0.0"}],"location":{"domain":"physical","lat":20.632784250388,"lon":-158.203125},"created":"2012-02-25T03:26:13.453958Z","feed":"https://api.cosm.com/v2/feeds/49679.json","private":"false","id":49679,"version":"1.0.0","updated":"2012-06-22T17:44:43.368830Z"}
+\ No newline at end of file
+diff --git a/02_cosm/spec/fixtures/49679_rental_plateau_value.json b/02_cosm/spec/fixtures/49679_rental_plateau_value.json
+new file mode 100644
+index 0000000..4793b57
+--- /dev/null
++++ b/02_cosm/spec/fixtures/49679_rental_plateau_value.json
+@@ -0,0 +1 @@
++{"title":"House","status":"live","creator":"https://cosm.com/users/kaneohe1450","datastreams":[{"at":"2012-06-22T17:49:58.501389Z","tags":["Mains"],"unit":{"type":"derivedSI","label":"W"},"max_value":"16958.0","current_value":"591","id":"0","min_value":"0.0"},{"at":"2012-06-22T17:49:58.501389Z","tags":["Rental"],"unit":{"type":"derivedSI","label":"W"},"max_value":"12428.0","current_value":"122","id":"1","min_value":"0.0"},{"at":"2012-06-22T17:49:58.501389Z","tags":["Office"],"unit":{"type":"derivedSI","label":"W"},"max_value":"638.0","current_value":"88","id":"2","min_value":"0.0"},{"at":"2012-06-22T17:49:58.501389Z","tags":["Refrig"],"unit":{"type":"derivedSI","label":"W"},"max_value":"838.0","current_value":"6","id":"3","min_value":"0.0"},{"at":"2012-06-22T17:49:58.501389Z","tags":["Freezer"],"unit":{"type":"derivedSI","label":"W"},"max_value":"2530.0","current_value":"0","id":"4","min_value":"0.0"},{"at":"2012-06-22T17:49:58.501389Z","tags":["M Bedroom"],"unit":{"type":"derivedSI","label":"W"},"max_value":"1444.0","current_value":"47","id":"5","min_value":"0.0"},{"at":"2012-06-22T17:49:58.501389Z","tags":["Water Heater"],"unit":{"type":"derivedSI","label":"W"},"max_value":"5189.0","current_value":"0","id":"6","min_value":"0.0"}],"location":{"domain":"physical","lat":20.632784250388,"lon":-158.203125},"created":"2012-02-25T03:26:13.453958Z","feed":"https://api.cosm.com/v2/feeds/49679.json","private":"false","id":49679,"version":"1.0.0","updated":"2012-06-22T17:49:58.559697Z"}
+\ No newline at end of file
+diff --git a/02_cosm/spec/fixtures/cosm_screen_49679.png b/02_cosm/spec/fixtures/cosm_screen_49679.png
+new file mode 100644
+index 0000000..c551bc8
+Binary files /dev/null and b/02_cosm/spec/fixtures/cosm_screen_49679.png differ
+diff --git a/Gemfile b/Gemfile
+new file mode 100644
+index 0000000..4fd0438
+--- /dev/null
++++ b/Gemfile
+@@ -0,0 +1,11 @@
++source 'http://rubygems.org'
++
++gem 'json'
++gem 'rspec'
++gem 'rspec-core'
++gem 'fakeweb'
++
++gem 'pachube-stream'
++
++
++gem 'ruby-debug-ide'  #Useful for RubyMine IDE, so that you can use the debugger
+\ No newline at end of file
+diff --git a/Gemfile.lock b/Gemfile.lock
+new file mode 100644
+index 0000000..592e659
+--- /dev/null
++++ b/Gemfile.lock
+@@ -0,0 +1,43 @@
++GEM
++  remote: http://rubygems.org/
++  specs:
++    addressable (2.2.8)
++    diff-lcs (1.1.3)
++    eventmachine (1.0.0.rc.1)
++    fakeweb (1.3.0)
++    hashie (1.2.0)
++    json (1.7.3)
++    macaddr (1.6.1)
++      systemu (~> 2.5.0)
++    pachube-stream (0.0.4)
++      addressable (>= 2.2.3)
++      eventmachine (>= 1.0.0.beta.3)
++      hashie (>= 0.5.1)
++      uuid (~> 2.3.2)
++      yajl-ruby (~> 0.8.2)
++    rake (0.9.2.2)
++    rspec (2.10.0)
++      rspec-core (~> 2.10.0)
++      rspec-expectations (~> 2.10.0)
++      rspec-mocks (~> 2.10.0)
++    rspec-core (2.10.1)
++    rspec-expectations (2.10.0)
++      diff-lcs (~> 1.1.3)
++    rspec-mocks (2.10.1)
++    ruby-debug-ide (0.4.16)
++      rake (>= 0.8.1)
++    systemu (2.5.1)
++    uuid (2.3.5)
++      macaddr (~> 1.0)
++    yajl-ruby (0.8.3)
++
++PLATFORMS
++  ruby
++
++DEPENDENCIES
++  fakeweb
++  json
++  pachube-stream
++  rspec
++  rspec-core
++  ruby-debug-ide
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000..8dbaa16
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,22 @@
++01_dictionary
++=========
++1. Modify 01_dictionary/dictionary.rb so that this command will pass all of the test cases:
++
++  `cd 01_dictionary`
++  `rspec dictionary_spec.rb`
++
++02_cosm-ruby
++=========
++
++1. From the command line run `bundle install` to install the needed ruby gem libraries.
++2. Start by getting the tests in `feed_spec.rb` to pass.
++3. Then get the tests in `cosm_parser_spec.rb` to pass.
++
++
++  * Hint to use the json gem then:
++
++      `parsed_json = JSON(your_json_string)`
++
++  * Hint: see `example_cosm_access_by_http.rb` for connecting to cosm through ruby.
++
++4. You can ignore cosm_stream.rb -- cosm is now xively and this code no longer works with their API
+\ No newline at end of file
+
