@@ -9,7 +9,7 @@ class Feed
 	case input
     #json parse strings into key:value pair
     when String
-		  @input = JSON.parse(input)
+		  @input = JSON(input)
     when Hash
 		  @input = input
     end
