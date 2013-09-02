@@ -7,7 +7,7 @@ class Feed
   attr_accessor :input
   def initialize(input)
 	case input
-    #json parse strings into key:value pair
+    #json parse strings into key:value hash
     when String
 		  @input = JSON(input)
     when Hash
